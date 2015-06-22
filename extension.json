@@ -1,0 +1,18 @@
+{
+	"name": "ExtraMagic",
+	"version": "3.6.0, 2015-06-22",
+	"author": ["[http://www.organicdesign.co.nz/aran Aran Dunkley]"],
+	"url": "http://www.organicdesign.co.nz/Extension:ExtraMagic.php",
+	"description": "Adds useful variables and parser functions",
+	"license-name": "[https://www.gnu.org/licenses/gpl-2.0.html GNU General Public Licence 2.0] or later",
+	"type": "parserhook",
+	"callback": "ExtraMagic::onRegistration",
+	"Hooks": {
+		"LanguageGetMagic": ["ExtraMagic::onLanguageGetMagic"],
+		"MagicWordwgVariableIDs": ["ExtraMagic::onMagicWordwgVariableIDs"],
+		"ParserGetVariableValueVarCache": ["ExtraMagic::onParserGetVariableValueVarCache"]
+	},
+	"AutoloadClasses": {
+		"ExtraMagic": "ExtraMagic_body.php"
+	}
+}
