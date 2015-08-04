@@ -59,7 +59,6 @@ class ExtraMagic {
 
 	public static function onParserGetVariableValueSwitch( &$parser, &$cache, &$magicWordId, &$ret, &$frame ) {
 		global $wgUser, $wgTitle;
-		wfDebugLog( __CLASS__, $magicWordId );
 		switch( $magicWordId ) {
 
 			case "currentuser":
