@@ -57,48 +57,67 @@ class ExtraMagic {
 		return true;
 	}
 
-	public static function onParserGetVariableValueVarCache( &$parser, &$varCache ) {
+	public static function onParserGetVariableValueSwitch( &$parser, &$cache, &$magicWordId, &$ret, &$frame ) {
 		global $wgUser, $wgTitle;
+		wfDebugLog( __CLASS__, $magicWordId );
+		switch( $magicWordId ) {
 
-		// CURRENTUSER
-		$varCache['currentuser'] = $wgUser->mName;
+			case "currentuser":
+				$val = $wgUser->mName;
+			break;
 
-		// CURRENTPERSON:
-		$varCache['currentperson'] = $wgUser->getRealName();
+			case "currentperson":
+				$val = $wgUser->getRealName();
+			break;
 
-		// CURRENTLANG:
-		$varCache['currentlang'] = $wgUser->getOption( 'language' );
+			case "currentlang":
+				$val = $wgUser->getOption( 'language' );
+			break;
 
-		// CURRENTSKIN:
-		$varCache['currentskin'] = $wgUser->getOption( 'skin' );
+			case "currentskin":
+				$val = $wgUser->getOption( 'skin' );
+			break;
 
-		// ARTICLEID:
-		$varCache['articleid'] = is_object( $wgTitle ) ? $ret = $wgTitle->getArticleID() : 'NULL';
+			case "articleid":
+				$val = is_object( $wgTitle ) ? $ret = $wgTitle->getArticleID() : 'NULL';
+			break;
 
-		// IPADDRESS:
-		$varCache['ipaddress'] = array_key_exists( 'REMOTE_ADDR', $_SERVER ) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
+			case "ipaddress":
+				$val = array_key_exists( 'REMOTE_ADDR', $_SERVER ) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
+			break;
 
-		// DOMAIN:
-		$varCache['domain'] = array_key_exists( 'SERVER_NAME', $_SERVER ) ? str_replace( 'www.', '', $_SERVER['SERVER_NAME'] ) : 'localhost';
+			case "domain":
+				$val = array_key_exists( 'SERVER_NAME', $_SERVER ) ? str_replace( 'www.', '', $_SERVER['SERVER_NAME'] ) : 'localhost';
+			break;
 
-		// GUID:
-		$varCache['guid'] = strftime( '%Y%m%d', time() ) . '-' . substr( strtoupper( uniqid('', true) ), -5 );
+			case "guid":
+				$val = strftime( '%Y%m%d', time() ) . '-' . substr( strtoupper( uniqid('', true) ), -5 );
+			break;
 
-		// USERPAGESELFEDITS
-		$out = '';
-		$dbr = wfGetDB( DB_SLAVE );
-		$tbl = array( 'user', 'page', 'revision' );
-		$cond = array(
-			'user_name = page_title',
-			'rev_page  = page_id',
-			'rev_user  = user_id'
-		);
-		$res = $dbr->select( $tbl, 'user_name', $cond, __METHOD__, array( 'DISTINCT', 'ORDER BY' => 'user_name' ) );
-		foreach( $res as $row ) {
-			$title = Title::newFromText( $row->user_name, NS_USER );
-			if( is_object( $title ) && $title->exists() ) $out .= "*[[User:{$row->user_name}|{$row->user_name}]]\n";
+			case "userpageselfedits":
+				$out = '';
+				$dbr = wfGetDB( DB_SLAVE );
+				$tbl = array( 'user', 'page', 'revision' );
+				$cond = array(
+					'user_name = page_title',
+					'rev_page  = page_id',
+					'rev_user  = user_id'
+				);
+				$res = $dbr->select( $tbl, 'user_name', $cond, __METHOD__, array( 'DISTINCT', 'ORDER BY' => 'user_name' ) );
+				foreach( $res as $row ) {
+					$title = Title::newFromText( $row->user_name, NS_USER );
+					if( is_object( $title ) && $title->exists() ) $out .= "*[[User:{$row->user_name}|{$row->user_name}]]\n";
+				}
+				$val = $out;
+			break;
+
 		}
-		$varCache['userpageselfedits'] = $out;
+
+		// If a value was set (i.e. it's one of our magic words), disable the cache and set the return value
+		if( isset( $val ) ) {
+			$parser->disableCache();
+			$ret = $val;
+		}
 
 		return true;
 	}
