@@ -29,6 +29,7 @@ class ExtraMagic {
 		$wgParser->setFunctionHook( 'PREV',    __CLASS__ . '::expandPrev' );
 		$wgParser->setFunctionHook( 'NEXT',    __CLASS__ . '::expandNext' );
 		$wgParser->setFunctionHook( 'OWNER',   __CLASS__ . '::expandOwner', SFH_NO_HASH );
+		$wgParser->setFunctionHook( 'PRIVATE', __CLASS__ . '::expandPrivate', SFH_NO_HASH );
 	}
 
 	public static function onLanguageGetMagic( &$magicWords, $langCode = null ) {
@@ -48,6 +49,7 @@ class ExtraMagic {
 		$magicWords['PREV']    = array( 0, 'PREV' );
 		$magicWords['NEXT']    = array( 0, 'NEXT' );
 		$magicWords['OWNER']   = array( 0, 'OWNER' );
+		$magicWords['PRIVATE'] = array( 0, 'PRIVATE' );
 
 		return true;
 	}
@@ -202,6 +204,15 @@ class ExtraMagic {
 			$owner = User::newFromID( $row->rev_user )->getName();
 		}
 		return $owner;
+	}
+
+	public static function expandPrivate( $parser, $val ) {
+		global $wgPrivateData, $wgUser;
+		if( !is_array( $wgPrivateData ) ) return "Error: No private data defined!";
+		if( !array_key_exists( $val, $wgPrivateData ) ) return "Error: Private data \"$val\" not found!";
+		$groups = array_map( 'strtolower', preg_split( '|\s*,\s*|', $wgPrivateData[$val][0] ) );
+		$intersection = array_intersect( $groups, $wgUser->getEffectiveGroups() );
+		return count( $intersection ) > 0 ? $wgPrivateData[$val][1] : '';
 	}
 }
 
