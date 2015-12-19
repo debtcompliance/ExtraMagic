@@ -72,7 +72,8 @@ class ExtraMagic {
 			break;
 
 			case "currentlang":
-				$val = $wgUser->getOption( 'language' );
+				if( $_SERVER['HTTP_HOST'] == 'pt.organicdesign.co.nz' ) $val = 'pt-br';
+				else $val = $wgUser->getOption( 'language' );
 			break;
 
 			case "currentskin":
