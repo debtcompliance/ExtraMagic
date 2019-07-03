@@ -32,30 +32,8 @@ class ExtraMagic {
 		$wgParser->setFunctionHook( 'PRIVATE', __CLASS__ . '::expandPrivate', SFH_NO_HASH );
 	}
 
-	public static function onLanguageGetMagic( &$magicWords, $langCode = null ) {
- 
- 		// Magic words
-		foreach( self::$vars as $var ) {
-			$magicWords[strtolower( $var )] = array( 1, $var );
-		}
-
-		// Parser functions
-		$magicWords['REQUEST'] = array( 0, 'REQUEST' );
-		$magicWords['COOKIE']  = array( 0, 'COOKIE' );
-		$magicWords['USERID']  = array( 0, 'USERID' );
-		$magicWords['IFGROUP'] = array( 0, 'IFGROUP' );
-		$magicWords['IFUSES']  = array( 0, 'IFUSES' );
-		$magicWords['IFCAT']   = array( 0, 'IFCAT' );
-		$magicWords['PREV']    = array( 0, 'PREV' );
-		$magicWords['NEXT']    = array( 0, 'NEXT' );
-		$magicWords['OWNER']   = array( 0, 'OWNER' );
-		$magicWords['PRIVATE'] = array( 0, 'PRIVATE' );
-
-		return true;
-	}
-
 	public static function onMagicWordwgVariableIDs( &$variableIDs ) {
-		foreach( self::$vars as $var ) $variableIDs[] = strtolower( $var );
+		foreach( self::$vars as $var ) $variableIDs[] = 'MAG_' . $var;
 		return true;
 	}
 
@@ -63,40 +41,39 @@ class ExtraMagic {
 		global $wgUser, $wgTitle;
 		switch( $magicWordId ) {
 
-			case "currentuser":
-				$val = $wgUser->mName;
+			case 'MAG_CURRENTUSER':
+				$val = $wgUser->getName();
 			break;
 
-			case "currentperson":
+			case 'MAG_CURRENTPERSON':
 				$val = $wgUser->getRealName();
 			break;
 
-			case "currentlang":
-				if( $_SERVER['HTTP_HOST'] == 'pt.organicdesign.co.nz' ) $val = 'pt-br';
-				else $val = $wgUser->getOption( 'language' );
+			case 'MAG_CURRENTLANG':
+				$val = $wgUser->getOption( 'language' );
 			break;
 
-			case "currentskin":
+			case 'MAG_CURRENTSKIN':
 				$val = $wgUser->getOption( 'skin' );
 			break;
 
-			case "articleid":
+			case 'MAG_ARTICLEID':
 				$val = is_object( $wgTitle ) ? $ret = $wgTitle->getArticleID() : 'NULL';
 			break;
 
-			case "ipaddress":
+			case 'MAG_IPADDRESS':
 				$val = array_key_exists( 'REMOTE_ADDR', $_SERVER ) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
 			break;
 
-			case "domain":
+			case 'MAG_DOMAIN':
 				$val = array_key_exists( 'SERVER_NAME', $_SERVER ) ? str_replace( 'www.', '', $_SERVER['SERVER_NAME'] ) : 'localhost';
 			break;
 
-			case "guid":
+			case 'MAG_GUID':
 				$val = strftime( '%Y%m%d', time() ) . '-' . substr( strtoupper( uniqid('', true) ), -5 );
 			break;
 
-			case "userpageselfedits":
+			case 'MAG_USERPAGESELFEDITS':
 				$out = '';
 				$dbr = wfGetDB( DB_SLAVE );
 				$tbl = array( 'user', 'page', 'revision' );
@@ -112,7 +89,6 @@ class ExtraMagic {
 				}
 				$val = $out;
 			break;
-
 		}
 
 		// If a value was set (i.e. it's one of our magic words), disable the cache and set the return value
@@ -123,8 +99,6 @@ class ExtraMagic {
 
 		return true;
 	}
-
-
 
 	/**
 	 * Expand parser functions

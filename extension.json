@@ -1,6 +1,6 @@
 {
 	"name": "ExtraMagic",
-	"version": "3.8.0, 2015-010-04",
+	"version": "3.9.0, 2019-07-03",
 	"author": ["[http://www.organicdesign.co.nz/aran Aran Dunkley]"],
 	"url": "http://www.organicdesign.co.nz/Extension:ExtraMagic.php",
 	"description": "Adds useful variables and parser functions",
@@ -8,11 +8,13 @@
 	"type": "parserhook",
 	"callback": "ExtraMagic::onRegistration",
 	"Hooks": {
-		"LanguageGetMagic": ["ExtraMagic::onLanguageGetMagic"],
 		"MagicWordwgVariableIDs": ["ExtraMagic::onMagicWordwgVariableIDs"],
 		"ParserGetVariableValueSwitch": ["ExtraMagic::onParserGetVariableValueSwitch"]
 	},
 	"AutoloadClasses": {
 		"ExtraMagic": "ExtraMagic_body.php"
+	},
+	"ExtensionMessagesFiles": {
+		"ExtraMagic": "ExtraMagic.i18n.magic.php"
 	}
 }
