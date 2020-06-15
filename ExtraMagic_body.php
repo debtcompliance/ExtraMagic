@@ -1,7 +1,7 @@
 <?php
 class ExtraMagic {
 
-	private static $vars = array(
+	private static $vars = [
 		'CURRENTUSER',
 		'CURRENTPERSON',
 		'CURRENTLANG',
@@ -11,7 +11,7 @@ class ExtraMagic {
 		'DOMAIN',
 		'GUID',
 		'USERPAGESELFEDITS'
-	);
+	];
 
 	public static function onRegistration() {
 		global $wgExtensionFunctions;
@@ -75,14 +75,14 @@ class ExtraMagic {
 
 			case 'MAG_USERPAGESELFEDITS':
 				$out = '';
-				$dbr = wfGetDB( DB_SLAVE );
-				$tbl = array( 'user', 'page', 'revision' );
-				$cond = array(
+				$dbr = wfGetDB( DB_REPLICA );
+				$tbl = [ 'user', 'page', 'revision' ];
+				$cond = [
 					'user_name = page_title',
 					'rev_page  = page_id',
 					'rev_user  = user_id'
-				);
-				$res = $dbr->select( $tbl, 'user_name', $cond, __METHOD__, array( 'DISTINCT', 'ORDER BY' => 'user_name' ) );
+				];
+				$res = $dbr->select( $tbl, 'user_name', $cond, __METHOD__, [ 'DISTINCT', 'ORDER BY' => 'user_name' ] );
 				foreach( $res as $row ) {
 					$title = Title::newFromText( $row->user_name, NS_USER );
 					if( is_object( $title ) && $title->exists() ) $out .= "*[[User:{$row->user_name}|{$row->user_name}]]\n";
@@ -118,8 +118,8 @@ class ExtraMagic {
 	public static function expandUserID( &$parser, $param ) {
 		if( $param ) {
 			$col = strpos( $param, ' ' ) ? 'user_real_name' : 'user_name';
-			$dbr = wfGetDB( DB_SLAVE );
-			if( $row = $dbr->selectRow( 'user', array( 'user_id' ), array( $col => $param ) ) ) return $row->user_id;
+			$dbr = wfGetDB( DB_REPLICA );
+			if( $row = $dbr->selectRow( 'user', [ 'user_id' ], [ $col => $param ] ) ) return $row->user_id;
 		} else {
 			global $wgUser;
 			return $wgUser->getID();
@@ -135,7 +135,7 @@ class ExtraMagic {
 
 	public static function expandIfUses( &$parser, $tmpl, $then, $else = '' ) {
 		global $wgTitle;
-		$dbr  = wfGetDB( DB_SLAVE );
+		$dbr  = wfGetDB( DB_REPLICA );
 		$tmpl = $dbr->addQuotes( Title::newFromText( $tmpl )->getDBkey() );
 		$id   = $wgTitle->getArticleID();
 		return $dbr->selectRow( 'templatelinks', '1', "tl_from = $id AND tl_namespace = 10 AND tl_title = $tmpl" ) ? $then : $else;
@@ -144,7 +144,7 @@ class ExtraMagic {
 	public static function expandIfCat( &$parser, $cat, $then, $else = '' ) {
 		global $wgTitle;
 		$id   = $wgTitle->getArticleID();
-		$dbr  = wfGetDB( DB_SLAVE );
+		$dbr  = wfGetDB( DB_REPLICA );
 		$cat  = $dbr->addQuotes( Title::newFromText( $cat )->getDBkey() );
 		return $dbr->selectRow( 'categorylinks', '1', "cl_from = $id AND cl_to = $cat" ) ? $then : $else;
 	}
@@ -174,8 +174,8 @@ class ExtraMagic {
 			$title = $wgTitle;
 		} else $title = Title::newFromText( $title );
 		$id = $title->getArticleID();
-		$dbr = wfGetDB( DB_SLAVE );
-		if( $id > 0 && $row = $dbr->selectRow( 'revision', 'rev_user', array( 'rev_page' => $id ), __METHOD__, array( 'ORDER BY' => 'rev_timestamp' ) ) ) {
+		$dbr = wfGetDB( DB_REPLICA );
+		if( $id > 0 && $row = $dbr->selectRow( 'revision', 'rev_user', [ 'rev_page' => $id ], __METHOD__, [ 'ORDER BY' => 'rev_timestamp' ] ) ) {
 			$owner = User::newFromID( $row->rev_user )->getName();
 		}
 		return $owner;
