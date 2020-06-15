@@ -19,17 +19,17 @@ class ExtraMagic {
 	}
 
 	public static function setup() {
-		global $wgParser;
-		$wgParser->setFunctionHook( 'REQUEST', __CLASS__ . '::expandRequest', SFH_NO_HASH );
-		$wgParser->setFunctionHook( 'COOKIE',  __CLASS__ . '::expandCookie', SFH_NO_HASH );
-		$wgParser->setFunctionHook( 'USERID',  __CLASS__ . '::expandUserID', SFH_NO_HASH );
-		$wgParser->setFunctionHook( 'IFGROUP', __CLASS__ . '::expandIfGroup' );
-		$wgParser->setFunctionHook( 'IFUSES',  __CLASS__ . '::expandIfUses' );
-		$wgParser->setFunctionHook( 'IFCAT',   __CLASS__ . '::expandIfCat' );
-		$wgParser->setFunctionHook( 'PREV',    __CLASS__ . '::expandPrev' );
-		$wgParser->setFunctionHook( 'NEXT',    __CLASS__ . '::expandNext' );
-		$wgParser->setFunctionHook( 'OWNER',   __CLASS__ . '::expandOwner', SFH_NO_HASH );
-		$wgParser->setFunctionHook( 'PRIVATE', __CLASS__ . '::expandPrivate', SFH_NO_HASH );
+		$parser = \MediaWiki\MediaWikiServices::getInstance()->getParser();
+		$parser->setFunctionHook( 'REQUEST', __CLASS__ . '::expandRequest', Parser::SFH_NO_HASH );
+		$parser->setFunctionHook( 'COOKIE',  __CLASS__ . '::expandCookie', Parser::SFH_NO_HASH );
+		$parser->setFunctionHook( 'USERID',  __CLASS__ . '::expandUserID', Parser::SFH_NO_HASH );
+		$parser->setFunctionHook( 'IFGROUP', __CLASS__ . '::expandIfGroup' );
+		$parser->setFunctionHook( 'IFUSES',  __CLASS__ . '::expandIfUses' );
+		$parser->setFunctionHook( 'IFCAT',   __CLASS__ . '::expandIfCat' );
+		$parser->setFunctionHook( 'PREV',    __CLASS__ . '::expandPrev' );
+		$parser->setFunctionHook( 'NEXT',    __CLASS__ . '::expandNext' );
+		$parser->setFunctionHook( 'OWNER',   __CLASS__ . '::expandOwner', Parser::SFH_NO_HASH );
+		$parser->setFunctionHook( 'PRIVATE', __CLASS__ . '::expandPrivate', Parser::SFH_NO_HASH );
 	}
 
 	public static function onMagicWordwgVariableIDs( &$variableIDs ) {
