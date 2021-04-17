@@ -187,7 +187,7 @@ class ExtraMagic {
 		if( !array_key_exists( $val, $wgPrivateData ) ) return "Error: Private data \"$val\" not found!";
 		$groups = array_map( 'strtolower', preg_split( '|\s*,\s*|', $wgPrivateData[$val][0] ) );
 		$intersection = array_intersect( $groups, $wgUser->getEffectiveGroups() );
-		return count( $intersection ) > 0 ? $wgPrivateData[$val][1] : '';
+		return count( $intersection ) > 0 ? [ $wgPrivateData[$val][1], 'noparse' => false ] : '';
 	}
 }
 
