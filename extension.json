@@ -16,5 +16,6 @@
 	},
 	"ExtensionMessagesFiles": {
 		"ExtraMagic": "ExtraMagic.i18n.magic.php"
-	}
+	},
+	"manifest_version": 2
 }
