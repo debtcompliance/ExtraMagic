@@ -38,23 +38,25 @@ class ExtraMagic {
 	}
 
 	public static function onParserGetVariableValueSwitch( &$parser, &$cache, &$magicWordId, &$ret, &$frame ) {
-		global $wgUser, $wgTitle;
-		switch( $magicWordId ) {
+		global $wgTitle;
 
+		$user = RequestContext::getMain()->getUser();
+
+		switch( $magicWordId ) {
 			case 'MAG_CURRENTUSER':
-				$val = $wgUser->getName();
+				$val = $user->getName();
 			break;
 
 			case 'MAG_CURRENTPERSON':
-				$val = $wgUser->getRealName();
+				$val = $user->getRealName();
 			break;
 
 			case 'MAG_CURRENTLANG':
-				$val = $wgUser->getOption( 'language' );
+				$val = $user->getOption( 'language' );
 			break;
 
 			case 'MAG_CURRENTSKIN':
-				$val = $wgUser->getOption( 'skin' );
+				$val = $user->getOption( 'skin' );
 			break;
 
 			case 'MAG_ARTICLEID':
@@ -121,15 +123,15 @@ class ExtraMagic {
 			$dbr = wfGetDB( DB_REPLICA );
 			if( $row = $dbr->selectRow( 'user', [ 'user_id' ], [ $col => $param ] ) ) return $row->user_id;
 		} else {
-			global $wgUser;
-			return $wgUser->getID();
+			return RequestContext::getMain()->getUser()->getID();
 		}
 		return '';
 	}
 
 	public static function expandIfGroup( &$parser, $groups, $then, $else = '' ) {
-		global $wgUser;
-		$intersection = array_intersect( array_map( 'strtolower', explode( ',', $groups ) ), $wgUser->getEffectiveGroups() );
+		$user = RequestContext::getMain()->getUser();
+
+		$intersection = array_intersect( array_map( 'strtolower', explode( ',', $groups ) ), $user->getEffectiveGroups() );
 		return count( $intersection ) > 0 ? $then : $else;
 	}
 
@@ -182,11 +184,14 @@ class ExtraMagic {
 	}
 
 	public static function expandPrivate( $parser, $val ) {
-		global $wgPrivateData, $wgUser;
+		global $wgPrivateData;
+
+		$user = RequestContext::getMain()->getUser();
+
 		if( !is_array( $wgPrivateData ) ) return "Error: No private data defined!";
 		if( !array_key_exists( $val, $wgPrivateData ) ) return "Error: Private data \"$val\" not found!";
 		$groups = array_map( 'strtolower', preg_split( '|\s*,\s*|', $wgPrivateData[$val][0] ) );
-		$intersection = array_intersect( $groups, $wgUser->getEffectiveGroups() );
+		$intersection = array_intersect( $groups, $user->getEffectiveGroups() );
 		return count( $intersection ) > 0 ? [ $wgPrivateData[$val][1], 'isHTML' => true ] : '';
 	}
 }
