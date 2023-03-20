@@ -22,7 +22,7 @@ class ExtraMagic {
 	}
 
 	public static function setup() {
-		$parser = \MediaWiki\MediaWikiServices::getInstance()->getParser();
+		$parser = MediaWikiServices::getInstance()->getParser();
 		$parser->setFunctionHook( 'REQUEST', __CLASS__ . '::expandRequest', Parser::SFH_NO_HASH );
 		$parser->setFunctionHook( 'COOKIE',  __CLASS__ . '::expandCookie', Parser::SFH_NO_HASH );
 		$parser->setFunctionHook( 'USERID',  __CLASS__ . '::expandUserID', Parser::SFH_NO_HASH );
