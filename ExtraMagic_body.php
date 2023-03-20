@@ -38,8 +38,7 @@ class ExtraMagic {
 	}
 
 	public static function onParserGetVariableValueSwitch( &$parser, &$cache, &$magicWordId, &$ret, &$frame ) {
-		global $wgTitle;
-
+		$title = RequestContext::getMain()->getTitle();
 		$user = RequestContext::getMain()->getUser();
 
 		switch( $magicWordId ) {
@@ -60,7 +59,7 @@ class ExtraMagic {
 			break;
 
 			case 'MAG_ARTICLEID':
-				$val = is_object( $wgTitle ) ? $ret = $wgTitle->getArticleID() : 'NULL';
+				$val = is_object( $title ) ? $ret = $title->getArticleID() : 'NULL';
 			break;
 
 			case 'MAG_IPADDRESS':
@@ -95,7 +94,7 @@ class ExtraMagic {
 
 		// If a value was set (i.e. it's one of our magic words), disable the cache and set the return value
 		if( isset( $val ) ) {
-			$parser->disableCache();
+			$parser->getOutput()->updateCacheExpiry( 0 );
 			$ret = $val;
 		}
 
@@ -106,14 +105,14 @@ class ExtraMagic {
 	 * Expand parser functions
 	 */
 	public static function expandRequest( &$parser, $param, $default = '', $seperator = "\n" ) {
-		$parser->disableCache();
+		$parser->getOutput()->updateCacheExpiry( 0 );
 		$val = array_key_exists( $param, $_REQUEST ) ? $_REQUEST[$param] : $default;
 		if( is_array( $val ) ) $val = implode( $seperator, $val );
 		return $val;
 	}
 
 	public static function expandCookie( &$parser, $param, $default = '' ) {
-		$parser->disableCache();
+		$parser->getOutput()->updateCacheExpiry( 0 );
 		return array_key_exists( $param, $_COOKIE ) ? $_COOKIE[$param] : $default;
 	}
 
@@ -136,16 +135,14 @@ class ExtraMagic {
 	}
 
 	public static function expandIfUses( &$parser, $tmpl, $then, $else = '' ) {
-		global $wgTitle;
 		$dbr  = wfGetDB( DB_REPLICA );
 		$tmpl = $dbr->addQuotes( Title::newFromText( $tmpl )->getDBkey() );
-		$id   = $wgTitle->getArticleID();
+		$id   = RequestContext::getMain()->getTitle()->getArticleID();
 		return $dbr->selectRow( 'templatelinks', '1', "tl_from = $id AND tl_namespace = 10 AND tl_title = $tmpl" ) ? $then : $else;
 	}
 
 	public static function expandIfCat( &$parser, $cat, $then, $else = '' ) {
-		global $wgTitle;
-		$id   = $wgTitle->getArticleID();
+		$id   = RequestContext::getMain()->getTitle()->getArticleID();
 		$dbr  = wfGetDB( DB_REPLICA );
 		$cat  = $dbr->addQuotes( Title::newFromText( $cat )->getDBkey() );
 		return $dbr->selectRow( 'categorylinks', '1', "cl_from = $id AND cl_to = $cat" ) ? $then : $else;
@@ -160,11 +157,10 @@ class ExtraMagic {
 	}
 	
 	public static function nextprev( $l, $j ) {
-		global $wgTitle;
 		$r = '';
 		$l = preg_replace( '|\s*\[\[.+|', '', $l ); // ensure there's no "further results" link on the end
 		$l = explode( '#', $l );
-		$i = array_search( $wgTitle->getPrefixedText(), $l );
+		$i = array_search( RequestContext::getMain()->getTitle()->getPrefixedText(), $l );
 		if( $i !== false && array_key_exists( $i+$j, $l ) ) $r = $l[$i+$j];
 		return $r;
 	}
@@ -172,8 +168,7 @@ class ExtraMagic {
 	public static function expandOwner( $parser, $title ) {
 		$owner = '';
 		if( empty( $title ) ) {
-			global $wgTitle;
-			$title = $wgTitle;
+			$title = RequestContext::getMain()->getTitle();
 		} else $title = Title::newFromText( $title );
 		$id = $title->getArticleID();
 		$dbr = wfGetDB( DB_REPLICA );
