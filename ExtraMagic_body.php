@@ -1,4 +1,7 @@
 <?php
+
+use MediaWiki\MediaWikiServices;
+
 class ExtraMagic {
 
 	private static $vars = [
@@ -78,16 +81,16 @@ class ExtraMagic {
 			case 'MAG_USERPAGESELFEDITS':
 				$out = '';
 				$dbr = wfGetDB( DB_REPLICA );
-				$tbl = [ 'user', 'page', 'revision' ];
+				$tbl = [ 'actor', 'page', 'revision' ];
 				$cond = [
-					'user_name = page_title',
-					'rev_page  = page_id',
-					'rev_user  = user_id'
+					'actor_name = page_title',
+					'rev_page   = page_id',
+					'rev_actor  = actor_id'
 				];
-				$res = $dbr->select( $tbl, 'user_name', $cond, __METHOD__, [ 'DISTINCT', 'ORDER BY' => 'user_name' ] );
+				$res = $dbr->select( $tbl, 'actor_name', $cond, __METHOD__, [ 'DISTINCT', 'ORDER BY' => 'actor_name' ] );
 				foreach( $res as $row ) {
-					$title = Title::newFromText( $row->user_name, NS_USER );
-					if( is_object( $title ) && $title->exists() ) $out .= "*[[User:{$row->user_name}|{$row->user_name}]]\n";
+					$title = Title::newFromText( $row->actor_name, NS_USER );
+					if( is_object( $title ) && $title->exists() ) $out .= "*[[User:{$row->actor_name}|{$row->actor_name}]]\n";
 				}
 				$val = $out;
 			break;
@@ -177,8 +180,8 @@ class ExtraMagic {
 		} else $title = Title::newFromText( $title );
 		$id = $title->getArticleID();
 		$dbr = wfGetDB( DB_REPLICA );
-		if( $id > 0 && $row = $dbr->selectRow( 'revision', 'rev_user', [ 'rev_page' => $id ], __METHOD__, [ 'ORDER BY' => 'rev_timestamp' ] ) ) {
-			$owner = User::newFromID( $row->rev_user )->getName();
+		if( $id > 0 && $row = $dbr->selectRow( 'revision', 'rev_actor', [ 'rev_page' => $id ], __METHOD__, [ 'ORDER BY' => 'rev_timestamp' ] ) ) {
+			$owner = MediaWikiServices::getInstance()->getUserFactory()->newFromActorId( $row->rev_actor )->getName();
 		}
 		return $owner;
 	}
