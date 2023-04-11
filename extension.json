@@ -1,15 +1,25 @@
 {
 	"name": "ExtraMagic",
-	"version": "3.9.0, 2019-07-03",
-	"author": ["[http://www.organicdesign.co.nz/aran Aran Dunkley]"],
-	"url": "http://www.organicdesign.co.nz/Extension:ExtraMagic.php",
+	"version": "4.0.0-beta",
+	"license-name": "GPL-2.0-or-later",
+	"author": [
+		"[https://organicdesign.nz/User:Nad Aran Dunkley]",
+		"[https://absorto.dev Igor Absorto]",
+		"[https://professional.wiki/en/mediawiki-development Professional Wiki]"
+	],
+	"url": "https://organicdesign.nz/Extension:ExtraMagic",
 	"description": "Adds useful variables and parser functions",
-	"license-name": "[https://www.gnu.org/licenses/gpl-2.0.html GNU General Public Licence 2.0] or later",
 	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.39.0",
+		"platform": {
+			"php": ">= 8.0"
+		}
+	},
 	"callback": "ExtraMagic::onRegistration",
 	"Hooks": {
-		"MagicWordwgVariableIDs": ["ExtraMagic::onMagicWordwgVariableIDs"],
-		"ParserGetVariableValueSwitch": ["ExtraMagic::onParserGetVariableValueSwitch"]
+		"MagicWordwgVariableIDs": "ExtraMagic::onMagicWordwgVariableIDs",
+		"ParserGetVariableValueSwitch": "ExtraMagic::onParserGetVariableValueSwitch"
 	},
 	"AutoloadClasses": {
 		"ExtraMagic": "ExtraMagic_body.php"
